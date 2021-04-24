@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from collections import defaultdict
+from pathlib import Path
 import json
 import numpy as np
 import pickle
@@ -19,7 +20,7 @@ def annot2targets(annotations: dict, image_shapes: dict, grid_size: int):
     for annot in tqdm.tqdm(annotations['annotations']):
         x1, y1, w, h = annot['bbox']
         image_w, image_h, filename = image_shapes[annot['image_id']]
-        targets = targets_all[filename]
+        targets = targets_all[Path(filename).stem]
         if prev_shape != (image_w, image_h):
             cx = grid_centers_1d(image_w, grid_size)
             cy = grid_centers_1d(image_h, grid_size)
