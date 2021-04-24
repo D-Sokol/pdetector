@@ -18,8 +18,8 @@ def annot2targets(annotations: dict, image_shapes: dict, grid_size: int):
     prev_shape = None
     for annot in tqdm.tqdm(annotations['annotations']):
         x1, y1, w, h = annot['bbox']
-        targets = targets_all[annot['image_id']]
-        image_w, image_h, _unused = image_shapes[annot['image_id']]
+        image_w, image_h, filename = image_shapes[annot['image_id']]
+        targets = targets_all[filename]
         if prev_shape != (image_w, image_h):
             cx = grid_centers_1d(image_w, grid_size)
             cy = grid_centers_1d(image_h, grid_size)
