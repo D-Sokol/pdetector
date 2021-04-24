@@ -1,6 +1,6 @@
 [submodule "CycleGAN"]
 	path = CycleGAN
-	url = git@github.com:junyanz/CycleGAN.git
+	url = https://github.com/junyanz/CycleGAN.git
 [submodule "DDRNet"]
 	path = DDRNet
-	url = git@github.com:ydhongHIT/DDRNet.git
+	url = https://github.com/ydhongHIT/DDRNet.git
