@@ -88,7 +88,8 @@ def main(args):
     loss_layer = YOLOLoss(args.spatial_coef, args.positive_coef)
 
     for epoch in range(args.start_epoch, args.epochs):
-        losses = []
+        s_losses = []
+        c_losses = []
 
         model.train(True)
         for input, targets in tqdm(dl_train) if args.verbose else dl_train:
@@ -101,24 +102,29 @@ def main(args):
             lrs2.step()
             opt1.zero_grad()
             opt2.zero_grad()
-            losses.append(loss.item())
+            s_losses.append(loss_layer.last_losses[0])
+            c_losses.append(loss_layer.last_losses[1])
 
-        loss_train = np.mean(losses)
-        losses.clear()
+        s_loss_train = np.mean(s_losses)
+        c_loss_train = np.mean(c_losses)
+        s_losses.clear()
+        c_losses.clear()
 
         model.train(False)
         with torch.no_grad():
             for input, targets in tqdm(dl_test) if args.verbose else dl_test:
                 output = model(input)
                 loss = loss_layer(output, targets)
-                losses.append(loss.item())
+                s_losses.append(loss_layer.last_losses[0])
+                c_losses.append(loss_layer.last_losses[1])
 
-        loss_test = np.mean(losses)
+        s_loss_test = np.mean(s_losses)
+        c_loss_test = np.mean(c_losses)
 
-        print("Epoch {:2d}/{:2d}\tTrain loss {:.6f}\tTest loss {:.6f}".format(
+        print("Epoch {:2d}/{:2d}\tTrain losses ({:.6f},{:.6f})\tTest losses ({:.6f},{:.6f})".format(
             epoch, args.epochs,
-            loss_train,
-            loss_test
+            s_loss_train, c_loss_train,
+            s_loss_test, c_loss_test
         ))
 
         if epoch and epoch % args.checkpoints_freq == 0:

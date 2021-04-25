@@ -13,5 +13,6 @@ class YOLOLoss(nn.Module):
         obj_mask = target[:, :1]
         spatial_loss = F.mse_loss(input[:, 1:] * obj_mask, target[:, 1:] * obj_mask)
         class_loss = self.class_loss(input[:, :1], obj_mask)
+        self.last_losses = (spatial_loss.item(), class_loss.item())
         return self.spatial_coef * spatial_loss + class_loss
 
