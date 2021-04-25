@@ -82,9 +82,6 @@ def main(args):
     dist.init_process_group('gloo', init_method='file:///tmp/init', rank=0, world_size=1)
 
     dl_train, dl_test = create_dataloaders(args)
-    if args.verbose:
-        dl_train, dl_test = tqdm(dl_train), tqdm(dl_test)
-
     model = create_model(args).to(args.device)
     opt1, opt2, lrs1, lrs2 = create_optimizer(args, model)
     loss_layer = YOLOLoss(args.spatial_coef, args.positive_coef)
@@ -93,7 +90,7 @@ def main(args):
         losses = []
 
         model.train(True)
-        for input, targets in dl_train:
+        for input, targets in tqdm(dl_train) if args.verbose else dl_train:
             output = model(input)
             loss = loss_layer(output, targets)
             loss.backward()
@@ -110,14 +107,14 @@ def main(args):
 
         model.train(False)
         with torch.no_grad():
-            for input, targets in dl_test:
+            for input, targets in tqdm(dl_test) if args.verbose else dl_test:
                 output = model(input)
                 loss = loss_layer(output, targets)
                 losses.append(loss.item())
 
         loss_test = np.mean(losses)
 
-        print("Epoch {:2d}/{:2d}\tTrain loss {:6.2f}\tTest loss {:6.2f}".format(
+        print("Epoch {:2d}/{:2d}\tTrain loss {:.6f}\tTest loss {:.6f}".format(
             epoch, args.epochs,
             loss_train,
             loss_test
