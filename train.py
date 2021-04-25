@@ -44,8 +44,8 @@ def create_dataloaders(args):
         targets = pickle.load(file)
     dataset = PDDataset((args.data_path,), targets, device=args.device)
 
-    train_size = round(len(dataset) * args.val_size)
-    test_size = len(dataset) - train_size
+    test_size = round(len(dataset) * args.val_size)
+    train_size = len(dataset) - test_size
     data_train, data_test = random_split(dataset, (train_size, test_size))
 
     dl_train = DataLoader(data_train, batch_size=args.batch_size, shuffle=True)
