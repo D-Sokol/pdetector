@@ -8,8 +8,17 @@ from DDRNet.segmentation.DDRNet_23_slim import DualResNet, BasicBlock
 class Net(DualResNet):
     def __init__(self):
         super().__init__(BasicBlock, [2, 2, 2, 2], num_classes=19, planes=32, spp_planes=128, head_planes=64, augment=False)
-        # TODO: add some convolution layers
-        pass
+        self.head = nn.Sequential(
+            nn.Conv2d(64, 64, (3,3), padding=1),
+            nn.LeakyReLU(),
+            nn.Conv2d(64, 64, (3,3)),
+            nn.MaxPool2d(2),
+            nn.LeakyReLU(),
+            nn.Dropout2d(),
+            nn.Conv2d(64, 32, (3,3), padding=1),
+            nn.LeakyReLU(),
+            nn.Conv2d(32, 5, (1,1))
+        )
 
     def _forward(self, x):
         width_output = x.shape[-1] // 8
@@ -45,8 +54,7 @@ class Net(DualResNet):
 
     def forward(self, x):
         x = self._forward(x)
-        # TODO: apply convolution layers
-        return x
+        return self.head(x)
 
     def partial_parameters(self, from_base=True):
         if from_base:
@@ -55,8 +63,7 @@ class Net(DualResNet):
                           self.compression4, self.relu):
                 yield from layer.parameters()
         else:
-            for layer in ():
-                yield from layer.parameters()
+            yield from self.head.parameters()
 
     def load_pretrained(self, path='extra/DDRNet23s.pth'):
         state_dict = torch.load(path)
