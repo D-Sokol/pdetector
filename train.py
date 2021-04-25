@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, random_split
+from tqdm import tqdm
 
 from dataset import PDDataset
 from models import Net
@@ -14,8 +15,8 @@ from loss import YOLOLoss
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-path')
-    parser.add_argument('--annotations-path')
+    parser.add_argument('--data-path', required=True)
+    parser.add_argument('--annotations-path', required=True)
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--epochs', type=int, default=100)
@@ -41,7 +42,7 @@ def create_parser():
 def create_dataloaders(args):
     with open(args.annotations_path, 'rb') as file:
         targets = pickle.load(file)
-    dataset = PDDDataset((args.data_path,), targets, device=args.device)
+    dataset = PDDataset((args.data_path,), targets, device=args.device)
 
     train_size = round(len(dataset) * args.val_size)
     test_size = len(dataset) - train_size
@@ -58,7 +59,7 @@ def create_model(args):
         path = os.path.join(args.checkpoints_dir, f'checkpoint-{args.start_epoch}.pth')
         model.load_state_dict(torch.load(path))
     else:
-        model.load_pretrained(arg.ddr_weights)
+        model.load_pretrained(args.ddr_weights)
     return model.to(args.device)
 
 
@@ -69,9 +70,9 @@ def create_optimizer(args, model: Net):
     opt1 = Adam(model.partial_parameters(True), lr=args.lr_ddr)
     opt2 = Adam(model.partial_parameters(False), lr=args.lr)
 
-    lrs1 = StepLR(opt1, args.lr_step, args.lr_gamma)
+    lrs1 = StepLR(opt1, args.lr_steps, args.lr_gamma)
     lrs1.last_epoch = args.start_epoch - 1
-    lrs2 = StepLR(opt2, args.lr_step, args.lr_gamma)
+    lrs2 = StepLR(opt2, args.lr_steps, args.lr_gamma)
     lrs2.last_epoch = args.start_epoch - 1
     return opt1, opt2, lrs1, lrs2
 
