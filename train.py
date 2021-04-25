@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from dataset import PDDataset
 from models import Net
-from loss import YOLOLoss
+from loss import YOLOLoss, YOLOFocalLoss
 
 
 def create_parser():
@@ -85,7 +85,7 @@ def main(args):
     dl_train, dl_test = create_dataloaders(args)
     model = create_model(args).to(args.device)
     opt1, opt2, lrs1, lrs2 = create_optimizer(args, model)
-    loss_layer = YOLOLoss(args.spatial_coef, args.positive_coef)
+    loss_layer = YOLOFocalLoss(args.spatial_coef, args.positive_coef)
 
     for epoch in range(args.start_epoch, args.epochs):
         s_losses = []
