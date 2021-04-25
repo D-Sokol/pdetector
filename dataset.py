@@ -23,7 +23,7 @@ class PDDataset(Dataset):
     def __getitem__(self, ix):
         name = self.names[ix]
         data = plt.imread(name)
-        assert data.shape == (256, 256, 3) and 0.9 <= data.max() <= 1.0
+        #assert data.shape == (256, 256, 3) and 0.9 <= data.max() <= 1.0
         data = torch.as_tensor(data.transpose(2, 0, 1), dtype=torch.float32).to(self.device)
         if self.targets is not None:
             y = self.targets.get(Path(name).stem, self._default_targets)
