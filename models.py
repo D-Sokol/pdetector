@@ -9,15 +9,15 @@ class Net(DualResNet):
     def __init__(self):
         super().__init__(BasicBlock, [2, 2, 2, 2], num_classes=19, planes=32, spp_planes=128, head_planes=64, augment=False)
         self.head = nn.Sequential(
-            nn.Conv2d(64, 64, (3,3), padding=1),
+            nn.Conv2d(64, 256, (3,3), padding=1),
             nn.LeakyReLU(),
-            nn.Conv2d(64, 64, (3,3)),
+            nn.Conv2d(256, 256, (3,3)),
             nn.MaxPool2d(2),
             nn.LeakyReLU(),
-            nn.Dropout2d(),
-            nn.Conv2d(64, 32, (3,3), padding=1),
+            nn.Dropout2d(p=0.1),
+            nn.Conv2d(256, 64, (3,3), padding=1),
             nn.LeakyReLU(),
-            nn.Conv2d(32, 5, (1,1))
+            nn.Conv2d(64, 5, (1,1))
         )
 
     def _forward(self, x):
