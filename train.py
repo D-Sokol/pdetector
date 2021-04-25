@@ -78,6 +78,9 @@ def create_optimizer(args, model: Net):
 
 
 def main(args):
+    import torch.distributed as dist
+    dist.init_process_group('gloo', init_method='file:///tmp/init', rank=0, world_size=1)
+
     dl_train, dl_test = create_dataloaders(args)
     if args.verbose:
         dl_train, dl_test = tqdm(dl_train), tqdm(dl_test)
