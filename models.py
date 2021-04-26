@@ -19,7 +19,7 @@ class Net(DualResNet):
             nn.LeakyReLU(),
         )
         self.head = nn.Sequential(
-            nn.Conv2d(64, 256, (3,3), padding=1),
+            nn.Conv2d(128, 256, (3,3), padding=1),
             nn.LeakyReLU(),
             nn.Conv2d(256, 256, (3,3), padding=1),
             nn.MaxPool2d(2),
@@ -70,7 +70,7 @@ class Net(DualResNet):
         return x_
 
     def forward(self, x):
-        x = self._forward(x) + self.body(x)
+        x = torch.cat((self._forward(x), self.body(x)), dim=1)
         return self.head(x)
 
     def partial_parameters(self, from_base=True):
