@@ -8,6 +8,16 @@ from DDRNet.segmentation.DDRNet_23_slim import DualResNet, BasicBlock
 class Net(DualResNet):
     def __init__(self):
         super().__init__(BasicBlock, [2, 2, 2, 2], num_classes=19, planes=32, spp_planes=128, head_planes=64, augment=False)
+        self.body = nn.Sequential(
+            nn.Conv2d(3, 64, (3,3), padding=1, stride=2),
+            nn.LeakyReLU(),
+            nn.Conv2d(64, 128, (3,3), padding=1, stride=2),
+            nn.LeakyReLU(),
+            nn.Conv2d(128, 64, (3,3), padding=1, stride=2),
+            nn.BatchNorm2d(64),
+            nn.Dropout(.2),
+            nn.LeakyReLU(),
+        )
         self.head = nn.Sequential(
             nn.Conv2d(64, 256, (3,3), padding=1),
             nn.LeakyReLU(),
@@ -60,7 +70,7 @@ class Net(DualResNet):
         return x_
 
     def forward(self, x):
-        x = self._forward(x)
+        x = self._forward(x) + self.body(x)
         return self.head(x)
 
     def partial_parameters(self, from_base=True):
@@ -70,6 +80,7 @@ class Net(DualResNet):
                           self.compression4, self.relu):
                 yield from layer.parameters()
         else:
+            yield from self.body.parameters()
             yield from self.head.parameters()
 
     def load_pretrained(self, path='extra/DDRNet23s.pth'):
