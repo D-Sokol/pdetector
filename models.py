@@ -11,11 +11,18 @@ class Net(DualResNet):
         self.head = nn.Sequential(
             nn.Conv2d(64, 256, (3,3), padding=1),
             nn.LeakyReLU(),
-            nn.Conv2d(256, 256, (3,3)),
+            nn.Conv2d(256, 256, (3,3), padding=1),
             nn.MaxPool2d(2),
             nn.LeakyReLU(),
+            nn.Conv2d(256, 256, (3,3), padding=0),
+            nn.MaxPool2d(2),
             nn.Dropout2d(p=0.1),
-            nn.Conv2d(256, 64, (3,3), padding=1),
+            nn.LeakyReLU(),
+            nn.Conv2d(256, 256, (3,3), padding=1),
+            nn.LeakyReLU(),
+            nn.Conv2d(256, 256, (1,1)),
+            nn.LeakyReLU(),
+            nn.Conv2d(256, 64, (1,1)),
             nn.LeakyReLU(),
             nn.Conv2d(64, 5, (1,1))
         )
