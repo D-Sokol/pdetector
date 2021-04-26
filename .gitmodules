@@ -1,6 +1,6 @@
-[submodule "CycleGAN"]
-	path = CycleGAN
-	url = https://github.com/junyanz/CycleGAN.git
 [submodule "DDRNet"]
 	path = DDRNet
 	url = https://github.com/ydhongHIT/DDRNet.git
+[submodule "pytorch-CycleGAN-and-pix2pix"]
+	path = pytorch-CycleGAN-and-pix2pix
+	url = https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix.git
