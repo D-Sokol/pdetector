@@ -1,3 +1,4 @@
+import cv2
 import matplotlib.pyplot as plt
 import os
 import torch
@@ -35,3 +36,27 @@ class PDDataset(Dataset):
     def __len__(self):
         return len(self.names)
 
+
+class VideoDataset(IterableDataset):
+    class VideoIterator:
+        def __init__(self, path, shape, device):
+            self.cap = cv2.VideoCapture(path)
+            self.shape = shape
+            self.device = device
+
+        def __next__(self):
+            success, frame = self.cap.read()
+            if not success:
+                self.cap.release()
+                raise StopIteration
+            frame = cv2.resize(frame, self.shape) / 255
+            data = torch.as_tensor(frame.transpose(2, 0, 1), dtype=torch.float32).to(self.device)
+            return data
+
+    def __init__(self, path, shape, device='cpu'):
+        self.path = path
+        self.shape = shape
+        self.device = device
+
+    def __iter__(self):
+        return VideoDataset.VideoIterator(self.path, self.shape, self.device)
