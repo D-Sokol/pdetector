@@ -62,6 +62,7 @@ if __name__ == '__main__':
         threshold=0.25,
         batch_size=64,
         verbose=False,
+        lw=5,
     )
 
     thread = Thread(target=wrapper, args=(config, writer))

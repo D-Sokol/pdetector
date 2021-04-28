@@ -23,6 +23,8 @@ def create_parser():
     parser.add_argument('--min-proba', '-p', type=float, default=0.5)
     parser.add_argument('--threshold', '-t', type=float, default=0.25)
 
+    parser.add_argument('--lw', '--line-width', type=int, default=5)
+
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--verbose', action='store_true')
     return parser
@@ -93,10 +95,10 @@ def non_maximum_suppression(boxes, threshold=0.25):
     return boxes[1:, valid]
 
 
-def draw_boxes(frame, boxes):
+def draw_boxes(frame, boxes, args):
     for box in boxes.T:
         box = tuple(box)
-        cv2.rectangle(frame, box[0:2], box[2:4], (255,0,0))
+        cv2.rectangle(frame, box[0:2], box[2:4], (255,0,0), args.lw)
 
 
 def main(args, writer):
@@ -116,7 +118,7 @@ def main(args, writer):
                 boxes = boxes.round().astype(int)
                 frame = frame.squeeze().cpu().numpy().transpose(1,2,0)
                 frame = (frame * 255).round().astype(np.uint8)
-                draw_boxes(frame, boxes)
+                draw_boxes(frame, boxes, args)
                 writer.write(frame)
 
 
