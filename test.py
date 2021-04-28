@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from dataset import VideoDataset
 from models import Net
@@ -21,12 +22,15 @@ def create_parser():
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--min-proba', '-p', type=float, default=0.5)
     parser.add_argument('--threshold', '-t', type=float, default=0.25)
+
+    parser.add_argument('--batch-size', type=int, default=64)
+    parser.add_argument('--verbose', action='store_true')
     return parser
 
 
 def create_dataloader(args):
     dataset = VideoDataset(args.input, (512,512), args.device)
-    return DataLoader(dataset)
+    return DataLoader(dataset, batch_size=args.batch_size)
 
 
 def create_model(args):
@@ -103,16 +107,17 @@ def main(args, writer):
     model = create_model(args).to(args.device)
 
     with torch.no_grad():
-        for frame in dl:
-            shape = frame.shape[1:3]
-            predictions = model(frame).squeeze()
-            boxes = get_boxes(predictions, shape, args.min_proba).cpu().numpy()
-            boxes = non_maximum_suppression(boxes)
-            boxes = boxes.round().astype(int)
-            frame = frame.squeeze().cpu().numpy().transpose(1,2,0)
-            frame = (frame * 255).round().astype(np.uint8)
-            draw_boxes(frame, boxes)
-            writer.write(frame)
+        for batch in tqdm(dl) if args.verbose else dl:
+            shape = batch.shape[2:4]
+            predictions_batch = model(batch).squeeze()
+            for predictions, frame in zip(predictions_batch, batch):
+                boxes = get_boxes(predictions, shape, args.min_proba).cpu().numpy()
+                boxes = non_maximum_suppression(boxes)
+                boxes = boxes.round().astype(int)
+                frame = frame.squeeze().cpu().numpy().transpose(1,2,0)
+                frame = (frame * 255).round().astype(np.uint8)
+                draw_boxes(frame, boxes)
+                writer.write(frame)
 
 
 if __name__ == '__main__':

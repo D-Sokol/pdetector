@@ -60,6 +60,8 @@ if __name__ == '__main__':
         device='cuda',
         min_proba=0.5,
         threshold=0.25,
+        batch_size=64,
+        verbose=False,
     )
 
     thread = Thread(target=wrapper, args=(config, writer))
