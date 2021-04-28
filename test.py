@@ -44,6 +44,7 @@ def get_boxes(predictions: torch.Tensor, image_shape, p=0.5):
     cy = torch.as_tensor(grid_centers_1d(image_h, grid_size), dtype=torch.float32)
     cx2d, cy2d = torch.meshgrid(cx, cy)
     cx2d, cy2d = cx2d.T, cy2d.T
+    cx2d, cy2d = cx2d.to(predictions.device), cy2d.to(predictions.device)
 
     torch.exp_(predictions[3:])
     predictions[1] *= image_w / grid_size
@@ -90,6 +91,7 @@ def non_maximum_suppression(boxes, threshold=0.25):
 
 def draw_boxes(frame, boxes):
     for box in boxes.T:
+        box = tuple(box)
         cv2.rectangle(frame, box[0:2], box[2:4], (255,0,0))
 
 
@@ -104,9 +106,11 @@ def main(args, writer):
         for frame in dl:
             shape = frame.shape[1:3]
             predictions = model(frame).squeeze()
-            boxes = get_boxes(predictions, shape, args.min_proba).cpu()
+            boxes = get_boxes(predictions, shape, args.min_proba).cpu().numpy()
             boxes = non_maximum_suppression(boxes)
-            frame = frame.cpu().numpy().transpose(1,2,0)
+            boxes = boxes.round().astype(int)
+            frame = frame.squeeze().cpu().numpy().transpose(1,2,0)
+            frame = (frame * 255).round().astype(np.uint8)
             draw_boxes(frame, boxes)
             writer.write(frame)
 
