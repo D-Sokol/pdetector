@@ -45,14 +45,14 @@ def get_boxes(predictions: torch.Tensor, image_shape, p=0.5):
     cx2d, cy2d = torch.meshgrid(cx, cy)
     cx2d, cy2d = cx2d.T, cy2d.T
 
-    torch.exp_(targets[3:])
+    torch.exp_(predictions[3:])
     predictions[1] *= image_w / grid_size
     predictions[2] *= image_h / grid_size
     predictions[3] *= image_w / grid_size
     predictions[4] *= image_h / grid_size
 
-    predictions[1] += cx2d - targets[3] / 2
-    predictions[2] += cy2d - targets[4] / 2
+    predictions[1] += cx2d - predictions[3] / 2
+    predictions[2] += cy2d - predictions[4] / 2
     predictions[3:5] += predictions[1:3]
 
     predictions = predictions.view(-1, grid_size**2)
@@ -103,7 +103,7 @@ def main(args, writer):
     with torch.no_grad():
         for frame in dl:
             shape = frame.shape[1:3]
-            predictions = model(frame)
+            predictions = model(frame).squeeze()
             boxes = get_boxes(predictions, shape, args.min_proba).cpu()
             boxes = non_maximum_suppression(boxes)
             frame = frame.cpu().numpy().transpose(1,2,0)
