@@ -15,8 +15,8 @@ from preprocess_annotations import grid_centers_1d
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('weights', required=True)
-    parser.add_argument('input', required=True)
+    parser.add_argument('weights')
+    parser.add_argument('input')
     parser.add_argument('output', default='result.avi')
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--min-proba', '-p', type=float, default=0.5)
