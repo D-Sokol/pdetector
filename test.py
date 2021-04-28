@@ -96,9 +96,11 @@ def non_maximum_suppression(boxes, threshold=0.25):
 
 
 def draw_boxes(frame, boxes, args):
+    matrix = cv2.UMat(frame)
     for box in boxes.T:
         box = tuple(box)
-        cv2.rectangle(frame, box[0:2], box[2:4], (255,0,0), args.lw)
+        cv2.rectangle(matrix, box[0:2], box[2:4], (255,0,0), args.lw)
+    return matrix.get()
 
 
 def main(args, writer):
@@ -118,7 +120,7 @@ def main(args, writer):
                 boxes = boxes.round().astype(int)
                 frame = frame.squeeze().cpu().numpy().transpose(1,2,0)
                 frame = (frame * 255).round().astype(np.uint8)
-                draw_boxes(frame, boxes, args)
+                frame = draw_boxes(frame, boxes, args)
                 writer.write(frame)
 
 
